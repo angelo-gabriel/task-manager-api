@@ -20,7 +20,8 @@ router.post('/chat', async (req, res) => {
   const response = await ollama.chat({
     model: 'gemma:2b',
     messages: [{role: 'user', content: body.message}],
-    stream: true
+    stream: true,
+    // keep_alive: 1
   })
 
   for await (const part of response) {

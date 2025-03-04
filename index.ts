@@ -1,21 +1,11 @@
-import { Request, Response } from 'express'
+import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { corsOptions } from './cors'
 import dotenv from 'dotenv'
-import chat from './routes/chat'
-import { PrismaClient } from '@prisma/client'
-
-const express = require('express')
+import chat from './src/routes/chat'
+import sqlite3 from 'sqlite3'
 
 dotenv.config()
-
-const prisma = new PrismaClient()
-
-interface Note {
-  title: string
-  details: string
-  category: string
-}
 
 function main() {
   const app = express()
@@ -23,41 +13,66 @@ function main() {
 
   app.use(cors(corsOptions))
   app.use(express.json())
-
-  app.get('/notes', async (req: Request, res: Response) => {
-    try {
-      const notes = await prisma.note.findMany()
-      console.log(notes)
-      return res.status(200).json({ notes })
-    } catch (error) {
-      return res.status(500).json({ error: 'Erro ao buscar notas' })
+  const db = new sqlite3.Database('./notes.db', (err) => {
+    if (err) {
+      console.error('Erro ao conectar com o Banco de Dados', err)
+    } else {
+      console.log('Conectado ao Banco de Dados SQLITE')
     }
   })
 
-  app.delete('/notes/:id', async (req: Request, res: Response) => {
+  db.run(
+    `CREATE TABLE IF NOT EXISTS notes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT,
+      details TEXT,
+      category TEXT
+    )`
+  )
+
+  interface Note {
+    id: number
+    title: string
+    details: string
+    category: string
+  }
+
+  app.get('/notes', (req: Request, res: Response) => {
+    db.all('SELECT * FROM notes', [], (err, rows: Note[]) => {
+      if (err) {
+        res.status(500).json({ error: err.message })
+      } else {
+        res.json({ notes: rows })
+      }
+    })
+  })
+
+  app.delete('/notes/:id', (req: Request, res: Response) => {
     const { id } = req.params
-    try {
-      await prisma.note.delete({
-        where: { id: Number(id) },
-      })
-      return res.status(200).json({ message: 'Nota deletada com sucesso' })
-    } catch (error) {
-      return res.status(500).json({ message: 'Erro ao deletar' })
-    }
+
+    db.run('DELETE FROM notes WHERE id = ?', [id], function (err) {
+      if (err) {
+        return res.status(500).json({ error: 'Erro ao remover nota'})
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Nota não encontrada'})
+      }
+      res.json({ message: 'Nota removida com sucesso!'})
+    })
   })
 
-  app.post('/notes', async (req: Request, res: Response) => {
-    const { title, details, category }: Note = req.body
-
-    try {
-      const newNote = await prisma.note.create({
-        data: { title, details, category },
-      })
-      return res.status(201).json(newNote)
-    } catch (error) {
-      return res.status(500).json({ error: 'Erro ao criar nota' })
-    }
-  })
+  app.post('/notes', (req: Request, res: Response) => {
+    const { title, details, category }: Note = req.body;
+    const sql = `INSERT INTO notes (title, details, category) VALUES (?, ?, ?)`;
+    db.run(sql, [title, details, category], function (err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        res.status(201).json({ id: this.lastID, title, details, category });
+      }
+    });
+  });
 
   app.use('/api', chat)
   app.listen(port, () => {
@@ -66,3 +81,18 @@ function main() {
 }
 
 main()
+
+// async function main() {
+//   const response = await ollama.chat({
+//     model: 'gemma:2b',
+//     messages: [
+//       {
+//         role: 'user',
+//         content: 'What color is the sky?'
+//       },
+//     ],
+//   })
+//   console.log(response.message.content)
+// }
+
+// main()
