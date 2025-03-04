@@ -47,6 +47,21 @@ function main() {
     })
   })
 
+  app.delete('/notes/:id', (req: Request, res: Response) => {
+    const { id } = req.params
+
+    db.run('DELETE FROM notes WHERE id = ?', [id], function (err) {
+      if (err) {
+        return res.status(500).json({ error: 'Erro ao remover nota'})
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Nota não encontrada'})
+      }
+      res.json({ message: 'Nota removida com sucesso!'})
+    })
+  })
+
   app.post('/notes', (req: Request, res: Response) => {
     const { title, details, category }: Note = req.body;
     const sql = `INSERT INTO notes (title, details, category) VALUES (?, ?, ?)`;
