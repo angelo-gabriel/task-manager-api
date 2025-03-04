@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "build": "npx tsc",
+    "build": "npx prisma generate && npx prisma migrate deploy && npx tsc",
     "start": "npm run build && node dist/src/index.js",
-    "vercel-build": "npx prisma generate && npx prisma migrate deploy"
+    "dev": "nodemon ./src/index.ts"
   },
   "keywords": [],
   "author": "",
