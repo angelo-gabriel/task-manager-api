@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import cors from 'cors'
-import { corsOptions } from '../cors'
+import { corsOptions } from './cors'
 import dotenv from 'dotenv'
 import chat from './routes/chat'
 import { PrismaClient } from '@prisma/client'
