@@ -81,18 +81,3 @@ function main() {
 }
 
 main()
-
-// async function main() {
-//   const response = await ollama.chat({
-//     model: 'gemma:2b',
-//     messages: [
-//       {
-//         role: 'user',
-//         content: 'What color is the sky?'
-//       },
-//     ],
-//   })
-//   console.log(response.message.content)
-// }
-
-// main()
