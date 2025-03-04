@@ -26,7 +26,7 @@ function main() {
 
   app.get('/notes', async (req: Request, res: Response) => {
     try {
-      const notes = await prisma.notes.findMany()
+      const notes = await prisma.note.findMany()
       console.log(notes)
       return res.status(200).json({ notes })
     } catch (error) {
@@ -37,7 +37,7 @@ function main() {
   app.delete('/notes/:id', async (req: Request, res: Response) => {
     const { id } = req.params
     try {
-      await prisma.notes.delete({
+      await prisma.note.delete({
         where: { id: Number(id) },
       })
       return res.status(200).json({ message: 'Nota deletada com sucesso' })
@@ -50,7 +50,7 @@ function main() {
     const { title, details, category }: Note = req.body
 
     try {
-      const newNote = await prisma.notes.create({
+      const newNote = await prisma.note.create({
         data: { title, details, category },
       })
       return res.status(201).json(newNote)
