@@ -11,7 +11,8 @@ Ollama
 `ollama serve`
 2. Clone o repositório com o Git
 3. Abra a pasta na sua IDE e utilize o comando:
-`npm run dev`
+`npm install`
+4. Inicie o servidor: `npm run dev`
 
 ## Funcionamento
 Até o momento, as únicas funcionalidades do back-end são:
