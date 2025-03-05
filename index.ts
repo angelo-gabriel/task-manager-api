@@ -9,7 +9,7 @@ dotenv.config()
 
 function main() {
   const app = express()
-  const port = 8080
+  const port = 3333
 
   app.use(cors(corsOptions))
   app.use(express.json())
